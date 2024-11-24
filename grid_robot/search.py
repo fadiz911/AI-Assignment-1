@@ -25,17 +25,25 @@ def get_best(open_set):
 
 
 def add_to_closed(vn, closed_set):
-    closed_set.add(vn.state.get_state_str())  # Add the state string to the closed set
+    # Add a tuple of (state string, stairs carried) to the closed set
+    closed_set.add((vn.state.get_state_str(), vn.state.get_carried_stairs()))
+
 
 
 def duplicate_in_open(vn, open_set):
-    # Check if the state is already in open_set based on state string
-    return any(vn.state.get_state_str() == node.state.get_state_str() for _, node in open_set)
+    # Check if the state is already in open_set with the same number of stairs carried
+    state_str = vn.state.get_state_str()
+    stairs_carried = vn.state.get_carried_stairs()
+    return any(state_str == node.state.get_state_str() and stairs_carried == node.state.get_carried_stairs()
+               for _, node in open_set)
 
 
 def duplicate_in_closed(vn, closed_set):
-    # Check if the state is already in the closed set
-    return vn.state.get_state_str() in closed_set
+    # Check if the state and stairs carried are already in the closed set
+    state_str = vn.state.get_state_str()
+    stairs_carried = vn.state.get_carried_stairs()
+    return (state_str, stairs_carried) in closed_set
+
 
 
 def print_path(path):
@@ -54,7 +62,6 @@ def search(start_state, heuristic):
     while open_not_empty(open_set):
 
         current = get_best(open_set)
-
         if start_state.is_goal_state(current.state):
             # Reconstruct the path
             path = []
