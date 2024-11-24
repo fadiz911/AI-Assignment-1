@@ -53,7 +53,15 @@ def duplicate_in_open(vn, open_set):
 #returns False if curr_neighbor state not in closed_set or has a lower g from the node in closed_set
 #remove the node with the higher g from closed_set (if exists)
 def duplicate_in_closed(vn, closed_set):
-    pass
+    for closed_node in closed_set:
+        if vn.state == closed_node.state:
+            if closed_node.g <= vn.g:
+                return True
+            else:
+                closed_set.remove(closed_node)
+                return False
+    # If no matching state exists in closed_set, return False
+    return False
 
 
 # helps to debug sometimes..
