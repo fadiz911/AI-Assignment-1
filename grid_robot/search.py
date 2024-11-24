@@ -13,11 +13,14 @@ def create_closed_set():
 def add_to_open(vn, open_set):
     i = 0
     while i < len(open_set):
-        if vn < open_set[i]:  # Compare based on f-value (assuming __lt__ is implemented in search_node)
+        if vn < open_set[i]:
             break
         i += 1
-    # Insert the node at the correct position
-    open_set.insert(i, vn)
+    if i >= len(open_set):
+        open_set.append(vn)
+    else:
+        open_set.insert(i+1, vn)
+
 
 def open_not_empty(open_set):
     return len(open_set) != 0
