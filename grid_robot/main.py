@@ -1,6 +1,6 @@
 import time
 from heuristics import *
-from grid_robot_solved.search import *
+from search import *
 
 if __name__ == '__main__':
     map = [
