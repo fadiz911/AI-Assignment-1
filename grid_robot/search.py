@@ -1,87 +1,70 @@
-from search_node import search_node
+import heapq
 from grid_robot_state import grid_robot_state
+from search_node import search_node
 
 
 def create_open_set():
-    return []
+    return []  # Min-heap for the open set
 
 
 def create_closed_set():
-    return set()
-
-
-def add_to_open(vn, open_set):
-    i = 0
-    while i < len(open_set):
-        if vn < open_set[i]:
-            break
-        i += 1
-    if i >= len(open_set):
-        open_set.append(vn)
-    else:
-        open_set.insert(i+1, vn)
+    return set()  # Set for the closed set
 
 
 def open_not_empty(open_set):
     return len(open_set) != 0
 
 
+def add_to_open(vn, open_set, open_set_lookup):
+    # Push the node to the heap and add the state to the lookup set for fast duplicate checks
+    heapq.heappush(open_set, vn)
+    open_set_lookup.add(vn.state.get_state_str())  # Add the string version of the state for fast lookup
+
+
 def get_best(open_set):
-    return open_set.pop(-1)
+    return heapq.heappop(open_set)  # Pop the node with the smallest f-value
 
 
 def add_to_closed(vn, closed_set):
-    closed_set.add(vn)
+    closed_set.add(vn.state.get_state_str())  # Add the state string to closed set
 
 
-#returns False if curr_neighbor state not in open_set or has a lower g from the node in open_set
-#remove the node with the higher g from open_set (if exists)
-def duplicate_in_open(vn, open_set):
-    for i in range(len(open_set)):
-        if vn.state == open_set[i].state:
-            if vn < open_set[i]:
-                # If the new node has a lower `g` value, replace the existing one
-                open_set.pop(i)
-                return False
-            # If the existing node has a lower or equal `g`, return True
-            return True
-    # If no duplicate is found, return False
-    return False
+def duplicate_in_open(vn, open_set_lookup):
+    # Check if the state is already in open_set_lookup
+    return vn.state.get_state_str() in open_set_lookup
 
 
-
-#returns False if curr_neighbor state not in closed_set or has a lower g from the node in closed_set
-#remove the node with the higher g from closed_set (if exists)
 def duplicate_in_closed(vn, closed_set):
-    for closed_node in closed_set:
-        if vn.state == closed_node.state:
-            if closed_node.g <= vn.g:
-                return True
-            else:
-                closed_set.remove(closed_node)
-                return False
-    # If no matching state exists in closed_set, return False
-    return False
+    # Check if the state is already in the closed set
+    return vn.state.get_state_str() in closed_set
 
 
-# helps to debug sometimes..
 def print_path(path):
     for i in range(len(path) - 1):
         print(f"[{path[i].state.get_state_str()}]", end=", ")
-    print(path[-1].state.state_str)
+    print(path[-1].state.get_state_str())
 
 
 def search(start_state, heuristic):
     open_set = create_open_set()
+    open_set_lookup = set()  # Set to track states in open set
     closed_set = create_closed_set()
+
     start_node = search_node(start_state, 0, heuristic(start_state))
-    add_to_open(start_node, open_set)
+    add_to_open(start_node, open_set, open_set_lookup)
+
+    nodes_processed = 0  # Track nodes processed
 
     while open_not_empty(open_set):
+        nodes_processed += 1
+        if nodes_processed % 1000 == 0:
+            print(f"Nodes processed: {nodes_processed}")  # Debugging line
 
         current = get_best(open_set)
+        open_set_lookup.remove(current.state.get_state_str())  # Remove from lookup after processing
 
         if grid_robot_state.is_goal_state(current.state):
+            print("Goal reached!")  # Debugging line
             path = []
             while current:
                 path.append(current)
@@ -93,7 +76,8 @@ def search(start_state, heuristic):
 
         for neighbor, edge_cost in current.get_neighbors():
             curr_neighbor = search_node(neighbor, current.g + edge_cost, heuristic(neighbor), current)
-            if not duplicate_in_open(curr_neighbor, open_set) and not duplicate_in_closed(curr_neighbor, closed_set):
-                add_to_open(curr_neighbor, open_set)
+            if not duplicate_in_open(curr_neighbor, open_set_lookup) and not duplicate_in_closed(curr_neighbor, closed_set):
+                add_to_open(curr_neighbor, open_set, open_set_lookup)
 
+    print(f"Total nodes processed: {nodes_processed}")
     return None

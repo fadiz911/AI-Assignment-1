@@ -1,12 +1,12 @@
+import heapq
 import math
-
 from grid_robot_state import grid_robot_state
+
 
 def base_heuristic(_grid_robot_state):
     robot_location = _grid_robot_state.get_robot_location()
     lamp_location = _grid_robot_state.get_lamp_location()
-    return math.sqrt((robot_location[0] - lamp_location[0])**2 +(robot_location[1] - lamp_location[1])**2)
-
+    return abs(robot_location[0] - lamp_location[0]) + abs(robot_location[1] - lamp_location[1])
 def advanced_heuristic(_grid_robot_state):
     robot_location = _grid_robot_state.get_robot_location()
     lamp_location = _grid_robot_state.get_lamp_location()
@@ -43,5 +43,4 @@ def advanced_heuristic(_grid_robot_state):
 
     # Final cost includes moving to the lamp and gathering stairs
     total_cost = distance_to_lamp + gathering_cost
-
     return total_cost
