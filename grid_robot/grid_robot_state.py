@@ -4,7 +4,7 @@ class grid_robot_state:
         self.map = map
         self.lamp_height = lamp_height
         self.lamp_location = lamp_location
-        self.carried_stairs = carried_stairs  # Add carried_stairs as a parameter
+        self.carried_stairs = carried_stairs
 
     @staticmethod
     def is_goal_state(_grid_robot_state):
@@ -45,6 +45,7 @@ class grid_robot_state:
                 lamp_location=self.lamp_location,
                 carried_stairs=stairs_at_location  # Update carried_stairs with the value of stairs at current location
             )
+            self.carried_stairs = self.get_location_value(self.robot_location)
             neighbors.append((new_state, 1))  # Assume picking stairs has a cost of 1
 
         # Placing stairs
@@ -58,6 +59,7 @@ class grid_robot_state:
                 lamp_location=self.lamp_location,
                 carried_stairs=0  # Reset carried_stairs after placing
             )
+            self.carried_stairs = 0
             neighbors.append((new_state, 1))  # Assume placing stairs has a cost of 1
 
         # Adding stairs to existing ones
@@ -73,6 +75,7 @@ class grid_robot_state:
                     lamp_location=self.lamp_location,
                     carried_stairs=0  # Reset carried_stairs after adding
                 )
+                self.carried_stairs = self.carried_stairs + self.get_location_value(self.robot_location)
                 neighbors.append((new_state, 1))  # Assume adding stairs has a cost of 1
 
         return neighbors
