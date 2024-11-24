@@ -1,33 +1,52 @@
+import queue
+
 from search_node import search_node
 from grid_robot_state import grid_robot_state
 
+
 def create_open_set():
-    pass
+    return []
 
 
 def create_closed_set():
-    pass
+    return set()
 
 
 def add_to_open(vn, open_set):
-    pass
+    i = 0
+    while i < len(open_set):
+        if vn < open_set[i]:
+            break
+        i += 1
+    if i >= len(open_set):
+        open_set.append(vn)
+    else:
+        open_set = open_set[:i] + vn + open_set[i + 1:]
 
 
 def open_not_empty(open_set):
-    pass
+    return len(open_set) != 0
 
 
 def get_best(open_set):
-    pass
+    return open_set.pop(-1)
 
 
 def add_to_closed(vn, closed_set):
-    pass
+    closed_set.add(vn)
+
 
 #returns False if curr_neighbor state not in open_set or has a lower g from the node in open_set
 #remove the node with the higher g from open_set (if exists)
 def duplicate_in_open(vn, open_set):
+    for i in range(0, len(open_set)):
+        if vn.state == open_set[i].state:
+            if vn < open_set[i]:
+                open_set.pop(i)
+            else:
+                open_set.pop(open_set.index(vn))
     pass
+
 
 #returns False if curr_neighbor state not in closed_set or has a lower g from the node in closed_set
 #remove the node with the higher g from closed_set (if exists)
@@ -37,13 +56,12 @@ def duplicate_in_closed(vn, closed_set):
 
 # helps to debug sometimes..
 def print_path(path):
-    for i in range(len(path)-1):
+    for i in range(len(path) - 1):
         print(f"[{path[i].state.get_state_str()}]", end=", ")
     print(path[-1].state.state_str)
 
 
 def search(start_state, heuristic):
-
     open_set = create_open_set()
     closed_set = create_closed_set()
     start_node = search_node(start_state, 0, heuristic(start_state))
@@ -69,7 +87,3 @@ def search(start_state, heuristic):
                 add_to_open(curr_neighbor, open_set)
 
     return None
-
-
-
-
