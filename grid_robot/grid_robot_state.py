@@ -7,7 +7,7 @@ class grid_robot_state:
         self.map = map
         self.lamp_height = lamp_height
         self.lamp_location = lamp_location
-
+        self.carried_stairs = 0
     @staticmethod
     def is_goal_state(_grid_robot_state):
         robot_location = _grid_robot_state.robot_location
@@ -36,24 +36,26 @@ class grid_robot_state:
                     neighbors.append((new_state, cost))
 
         # putting stairs
-        if self.get_location_value(self.robot_location) > 0 and self.lamp_height == -1:
+        if self.carried_stairs == 0 and self.get_location_value(self.robot_location) > 0:
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=self.map,
-                lamp_height=self.get_location_value(self.robot_location),
-                lamp_location=self.lamp_location
+                lamp_height=self.lamp_height,
+                lamp_location=self.lamp_location,
+                carried_stairs=self.get_location_value(self.robot_location)
             )
             neighbors.append((new_state, 1))
 
         # getting stairs
-        if self.lamp_height > 0 and self.get_location_value(self.robot_location) == 0:
+        if self.carried_stairs > 0 and self.get_location_value(self.robot_location) == 0:
             new_map = [row[:] for row in self.map]
-            new_map[x][y] = self.lamp_height
+            new_map[x][y] = self.carried_stairs
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
-                lamp_height=-1,
-                lamp_location=self.lamp_location
+                lamp_height=self.lamp_height,
+                lamp_location=self.lamp_location,
+                carried_stairs=0
             )
             neighbors.append((new_state, 1))
 
@@ -74,12 +76,8 @@ class grid_robot_state:
         return neighbors
 
 
-    # you can change the body of the function if you want
-        # def __hash__(self):
-
-        # you can change the body of the function if you want
-        # def __eq__(self, other):
-        # you can change the body of the function if you want
+    def get_carried_stairs(self):
+        return self.carried_stairs
 
     def get_state_str(self):
         return self.location
