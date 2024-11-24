@@ -1,5 +1,3 @@
-import queue
-
 from search_node import search_node
 from grid_robot_state import grid_robot_state
 
@@ -39,13 +37,17 @@ def add_to_closed(vn, closed_set):
 #returns False if curr_neighbor state not in open_set or has a lower g from the node in open_set
 #remove the node with the higher g from open_set (if exists)
 def duplicate_in_open(vn, open_set):
-    for i in range(0, len(open_set)):
+    for i in range(len(open_set)):
         if vn.state == open_set[i].state:
             if vn < open_set[i]:
+                # If the new node has a lower `g` value, replace the existing one
                 open_set.pop(i)
-            else:
-                open_set.pop(open_set.index(vn))
-    pass
+                return False
+            # If the existing node has a lower or equal `g`, return True
+            return True
+    # If no duplicate is found, return False
+    return False
+
 
 
 #returns False if curr_neighbor state not in closed_set or has a lower g from the node in closed_set
