@@ -55,7 +55,7 @@ def search(start_state, heuristic):
 
         current = get_best(open_set)
 
-        if grid_robot_state.is_goal_state(current.state):
+        if start_state.is_goal_state(current.state):
             # Reconstruct the path
             path = []
             while current:
