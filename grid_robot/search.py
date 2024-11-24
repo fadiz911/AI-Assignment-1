@@ -19,7 +19,7 @@ def add_to_open(vn, open_set):
     if i >= len(open_set):
         open_set.append(vn)
     else:
-        open_set = open_set[:i] + vn + open_set[i + 1:]
+        open_set.insert(i+1, vn)
 
 
 def open_not_empty(open_set):
