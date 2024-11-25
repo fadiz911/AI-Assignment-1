@@ -40,10 +40,13 @@ class grid_robot_state:
 
         # Picking up stairs
         if self.carried_stairs == 0 and self.get_location_value(self.robot_location) > 0:
-            stairs_at_location = self.get_location_value(self.robot_location)
+            location = self.robot_location
+            stairs_at_location = self.get_location_value(location)
+            new_map = [row[:] for row in self.map]
+            new_map[location[0]][location[1]] = 0
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
-                map=self.map,
+                map=new_map,
                 lamp_height=self.lamp_height,
                 lamp_location=self.lamp_location,
                 carried_stairs=stairs_at_location  # Update carried_stairs with the value of stairs at current location
@@ -52,21 +55,20 @@ class grid_robot_state:
             neighbors.append((new_state, 1))  # Assume picking stairs has a cost of 1
 
         # adding stairs to the robot
-        if self.carried_stairs  > 0 and self.get_location_value(self.robot_location) > 0:
+        if self.carried_stairs > 0 and self.get_location_value(self.robot_location) > 0:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
             if combined_height <= self.get_lamp_height():
-                new_map  = [row[:] for row in self.map]
+                new_map = [row[:] for row in self.map]
                 location = self.robot_location
                 new_map[location[0]][location[1]] = 0
                 new_state = grid_robot_state(
-                    robot_location= self.robot_location,
-                    map = new_map,
-                    lamp_height= self.lamp_height,
+                    robot_location=self.robot_location,
+                    map=new_map,
+                    lamp_height=self.lamp_height,
                     lamp_location=self.lamp_location,
                     carried_stairs=combined_height
                 )
-                neighbors.append((new_state,1))
-
+                neighbors.append((new_state, 1))
 
         # Placing stairs
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) == 0:
@@ -80,9 +82,9 @@ class grid_robot_state:
                 carried_stairs=0  # Reset carried_stairs after placing
             )
             self.carried_stairs = 0
-            neighbors.append((new_state, 1))  # Assume placing stairs has a cost of 1
+            neighbors.append((new_state, 1))
 
-        # Adding stairs to existing ones
+            # Adding stairs to existing ones
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) > 0:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
             if combined_height <= self.get_location_value(self.lamp_location):  # Valid addition
@@ -93,10 +95,10 @@ class grid_robot_state:
                     map=new_map,
                     lamp_height=self.lamp_height,
                     lamp_location=self.lamp_location,
-                    carried_stairs= 0  # Reset carried_stairs after adding
+                    carried_stairs=0  # Reset carried_stairs after adding
                 )
                 self.carried_stairs = self.carried_stairs + self.get_location_value(self.robot_location)
-                neighbors.append((new_state, 1))  # Assume adding stairs has a cost of 1
+                neighbors.append((new_state, 1))
 
         return neighbors
 
