@@ -72,7 +72,7 @@ def search(start_state, heuristic):
             return path
 
         add_to_closed(current, closed_set)
-
+        print(f"exploring the neighbors of {current.state.get_state_str()}")
         for neighbor, edge_cost in current.get_neighbors():
             curr_neighbor = search_node(neighbor, current.g + edge_cost, heuristic(neighbor), current)
             if not duplicate_in_open(curr_neighbor, open_set) and not duplicate_in_closed(curr_neighbor, closed_set):

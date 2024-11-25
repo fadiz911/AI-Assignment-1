@@ -1,7 +1,10 @@
+import copy
+
+
 class grid_robot_state:
     def __init__(self, robot_location, map=None, lamp_height=-1, lamp_location=(-1, -1), carried_stairs=0):
         self.robot_location = robot_location
-        self.map = map
+        self.map = copy.deepcopy(map)
         self.lamp_height = lamp_height
         self.lamp_location = lamp_location
         self.carried_stairs = carried_stairs
@@ -45,8 +48,25 @@ class grid_robot_state:
                 lamp_location=self.lamp_location,
                 carried_stairs=stairs_at_location  # Update carried_stairs with the value of stairs at current location
             )
-            self.carried_stairs = self.get_location_value(self.robot_location)
+            # self.carried_stairs = self.get_location_value(self.robot_location)
             neighbors.append((new_state, 1))  # Assume picking stairs has a cost of 1
+
+        # adding stairs to the robot
+        if self.carried_stairs  > 0 and self.get_location_value(self.robot_location) > 0:
+            combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
+            if combined_height <= self.get_lamp_height():
+                new_map  = [row[:] for row in self.map]
+                location = self.robot_location
+                new_map[location[0]][location[1]] = 0
+                new_state = grid_robot_state(
+                    robot_location= self.robot_location,
+                    map = new_map,
+                    lamp_height= self.lamp_height,
+                    lamp_location=self.lamp_location,
+                    carried_stairs=combined_height
+                )
+                neighbors.append((new_state,1))
+
 
         # Placing stairs
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) == 0:
@@ -73,7 +93,7 @@ class grid_robot_state:
                     map=new_map,
                     lamp_height=self.lamp_height,
                     lamp_location=self.lamp_location,
-                    carried_stairs=0  # Reset carried_stairs after adding
+                    carried_stairs= 0  # Reset carried_stairs after adding
                 )
                 self.carried_stairs = self.carried_stairs + self.get_location_value(self.robot_location)
                 neighbors.append((new_state, 1))  # Assume adding stairs has a cost of 1
