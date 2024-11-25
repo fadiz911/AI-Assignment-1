@@ -26,7 +26,7 @@ def get_best(open_set):
 
 def add_to_closed(vn, closed_set):
     # Add a tuple of (state string, stairs carried) to the closed set
-    closed_set.add((vn.state.get_state_str(), vn.state.get_carried_stairs()))
+    closed_set.add((vn.state.get_state_str(), vn.state.get_carried_stairs(),vn.state.get_location_value(vn.state.get_lamp_location())))
 
 
 

@@ -13,8 +13,13 @@ class grid_robot_state:
     def is_goal_state(_grid_robot_state):
         robot_location = _grid_robot_state.robot_location
         lamp_location = _grid_robot_state.lamp_location
-        return robot_location[0] == lamp_location[0] and robot_location[1] == lamp_location[
-            1] and _grid_robot_state.get_carried_stairs() == _grid_robot_state.get_lamp_height()
+
+        # Check if robot is at the lamp location
+        if robot_location != lamp_location:
+            return False
+
+        # Check if the height at the lamp location matches the lamp height
+        return _grid_robot_state.get_location_value(lamp_location) == _grid_robot_state.get_lamp_height()
 
     def get_neighbors(self):
         neighbors = []
