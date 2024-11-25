@@ -87,7 +87,7 @@ class grid_robot_state:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
             if combined_height <= self.get_location_value(self.lamp_location):  # Valid addition
                 new_map = [row[:] for row in self.map]  # Copy the map
-                new_map[x][y] = combined_height  # Combine the stairs
+                new_map[x][y] = 0  # Combine the stairs
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,
                     map=new_map,
