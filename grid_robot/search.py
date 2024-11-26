@@ -11,9 +11,15 @@ def create_closed_set():
 def open_not_empty(open_set):
     return len(open_set) != 0
 
-def add_to_open(vn, open_set):
-    # Push the node to the heap with priority: f, h, g
-    heapq.heappush(open_set, (vn.f, vn.h, vn.g, vn))  # Include h and g for tie-breaking
+def add_to_open(vn, open_set, best_g):
+    state_tuple = vn.state.get_state_tuple()
+    # Check if the state is already in best_g and whether the new g is better
+    if state_tuple in best_g and best_g[state_tuple] <= vn.g:
+        return  # Don't add if a better or equal path already exists
+
+    # Update best_g with the new, better g value
+    best_g[state_tuple] = vn.g
+    heapq.heappush(open_set, (vn.f, vn.h, vn.g, vn))
 
 def get_best(open_set):
     return heapq.heappop(open_set)[3]  # Extract the node (vn) from the tuple
@@ -48,11 +54,14 @@ def print_path(path):
 def search(start_state, heuristic):
     open_set = create_open_set()
     closed_set = create_closed_set()
+    best_g = {}  # Track the best g value for each state
+
     start_node = search_node(start_state, 0, heuristic(start_state))
-    add_to_open(start_node, open_set)
+    add_to_open(start_node, open_set, best_g)
 
     while open_not_empty(open_set):
         current = get_best(open_set)
+
         if start_state.is_goal_state(current.state):
             # Reconstruct the path
             path = []
@@ -67,8 +76,8 @@ def search(start_state, heuristic):
 
         for neighbor, edge_cost in current.get_neighbors():
             curr_neighbor = search_node(neighbor, current.g + edge_cost, heuristic(neighbor), current)
-            if not duplicate_in_open(curr_neighbor, open_set) and not duplicate_in_closed(curr_neighbor, closed_set):
-                add_to_open(curr_neighbor, open_set)
+            if not duplicate_in_closed(curr_neighbor, closed_set):
+                add_to_open(curr_neighbor, open_set, best_g)
 
     print("No solution found.")
     return None
