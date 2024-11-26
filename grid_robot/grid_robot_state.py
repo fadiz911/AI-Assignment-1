@@ -26,59 +26,25 @@ class grid_robot_state:
         x, y = self.robot_location
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-        # Move from one location to another
-        for dx, dy in directions:
-            new_x, new_y = x + dx, y + dy
-            if 0 <= new_x < len(self.map) and 0 <= new_y < len(self.map[0]):
-                if self.map[new_x][new_y] != -1:  # Check for valid cell (not an obstacle)
-                    cost = 1
-                    if self.carried_stairs > 0:  # Additional cost if carrying stairs
-                        cost += self.carried_stairs
-                    new_state = grid_robot_state(
-                        robot_location=(new_x, new_y),
-                        map=self.map,
-                        lamp_height=self.lamp_height,
-                        lamp_location=self.lamp_location,
-                        carried_stairs=self.carried_stairs  # Carry stairs unchanged
-                    )
-                    neighbors.append((new_state, cost))
-
-        # Picking up stairs
+        # Raise Stairs by Robot: The robot can lift stairs if it is at the same location as stairs and is not already carrying stairs.
         if self.carried_stairs == 0 and self.get_location_value(self.robot_location) > 0:
             location = self.robot_location
             stairs_at_location = self.get_location_value(location)
             new_map = [row[:] for row in self.map]
-            new_map[location[0]][location[1]] = 0
+            new_map[location[0]][location[1]] = 0  # Remove stairs from current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
                 lamp_height=self.lamp_height,
                 lamp_location=self.lamp_location,
-                carried_stairs=stairs_at_location  # Update carried_stairs with the value of stairs at current location
+                carried_stairs=stairs_at_location  # Carry the stairs
             )
-            # self.carried_stairs = self.get_location_value(self.robot_location)
-            neighbors.append((new_state, 1))  # Assume picking stairs has a cost of 1
+            neighbors.append((new_state, 1))  # Cost is 1 for lifting stairs
 
-        # adding stairs to the robot
-        if self.carried_stairs > 0 and self.get_location_value(self.robot_location) > 0:
-            combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
-            if combined_height <= self.get_lamp_height():
-                new_map = [row[:] for row in self.map]
-                location = self.robot_location
-                new_map[location[0]][location[1]] = 0
-                new_state = grid_robot_state(
-                    robot_location=self.robot_location,
-                    map=new_map,
-                    lamp_height=self.lamp_height,
-                    lamp_location=self.lamp_location,
-                    carried_stairs=combined_height
-                )
-                neighbors.append((new_state, 1))
-
-        # Placing stairs
+        # Place Stairs by Robot: The robot can place stairs on a free space (value 0).
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) == 0:
-            new_map = [row[:] for row in self.map]  # Copy the map
-            new_map[x][y] = self.carried_stairs  # Place stairs in the current cell
+            new_map = [row[:] for row in self.map]
+            new_map[x][y] = self.carried_stairs  # Place stairs at current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
@@ -87,23 +53,40 @@ class grid_robot_state:
                 carried_stairs=0  # Reset carried_stairs after placing
             )
             self.carried_stairs = 0
-            neighbors.append((new_state, 1))
+            neighbors.append((new_state, 1))  # Cost is 1 for placing stairs
 
-            # Adding stairs to existing ones
+        # Connect Stairs by Robot: The robot can combine stairs it is carrying with stairs at the current location.
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) > 0:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
-            if combined_height <= self.get_location_value(self.lamp_location):  # Valid addition
-                new_map = [row[:] for row in self.map]  # Copy the map
+            if combined_height <= self.get_lamp_height():  # Can combine stairs if total height is less than lamp height
+                new_map = [row[:] for row in self.map]
                 new_map[x][y] = 0  # Combine the stairs
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,
                     map=new_map,
                     lamp_height=self.lamp_height,
                     lamp_location=self.lamp_location,
-                    carried_stairs=0  # Reset carried_stairs after adding
+                    carried_stairs=0  # Reset carried_stairs after combining
                 )
-                self.carried_stairs = self.carried_stairs + self.get_location_value(self.robot_location)
-                neighbors.append((new_state, 1))
+                self.carried_stairs += self.get_location_value(self.robot_location)  # Add combined height
+                neighbors.append((new_state, 1))  # Cost is 1 for connecting stairs
+
+        # Moving the Robot to a Non-Obstacle Space: The robot can move in 4 directions.
+        for dx, dy in directions:
+            new_x, new_y = x + dx, y + dy
+            if 0 <= new_x < len(self.map) and 0 <= new_y < len(self.map[0]):
+                if self.map[new_x][new_y] != -1:  # Ensure the new space is not an obstacle
+                    cost = 1
+                    if self.carried_stairs > 0:
+                        cost += self.carried_stairs  # Additional cost if carrying stairs
+                    new_state = grid_robot_state(
+                        robot_location=(new_x, new_y),
+                        map=self.map,
+                        lamp_height=self.lamp_height,
+                        lamp_location=self.lamp_location,
+                        carried_stairs=self.carried_stairs  # Carry stairs unchanged
+                    )
+                    neighbors.append((new_state, cost))  # Cost for moving with or without stairs
 
         return neighbors
 
