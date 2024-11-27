@@ -109,7 +109,8 @@ class grid_robot_state:
 
     def get_location_value(self, location):
         return self.map[location[0]][location[1]]
-    def set_location_value(self, location,val):
+
+    def set_location_value(self, location, val):
         self.map[location[0]][location[1]] += val
 
     def get_robot_location(self):
