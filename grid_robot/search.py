@@ -11,6 +11,10 @@ def create_closed_set():
 def open_not_empty(open_set):
     return bool(open_set)
 
+def get_best(open_set):
+    return heapq.heappop(open_set)
+
+
 def add_to_open(vn, open_set):
     """
     Adds a search node to the open set, ensuring no duplicate states with worse or equal `g` values.
@@ -23,18 +27,14 @@ def add_to_open(vn, open_set):
             if node.g <= vn.g:
                 return  # If a better or equal `g` value exists, skip adding
             else:
-                # Remove the worse node and replace it with the new one
+                # Remove the worse node and push the new one
                 open_set[index] = open_set[-1]  # Replace with the last element
                 open_set.pop()  # Remove the duplicate
-                heapq.heapify(open_set)  # Rebuild the heap
-                break
+                heapq.heappush(open_set, vn)  # Push the new node and restore heap properties
+                return
 
     # Push the new node onto the heap
     heapq.heappush(open_set, vn)
-
-def get_best(open_set):
-    return heapq.heappop(open_set)
-
 
 def add_to_closed(vn, closed_set):
     # Include robot location, stairs carried, and lamp location value
@@ -45,19 +45,17 @@ def add_to_closed(vn, closed_set):
     ))
 
 def duplicate_in_open(vn, open_set):
-
     state_tuple = vn.state.get_state_tuple()
+    # Check for duplicate in open_set using the state_tuple
     return any(node.state.get_state_tuple() == state_tuple and node.g <= vn.g for node in open_set)
 
 def duplicate_in_closed(vn, closed_set):
-
     return (vn.state.get_state_str(),
             vn.state.get_carried_stairs(),
             vn.state.get_location_value(vn.state.get_robot_location())
             ) in closed_set
 
-
-# helps to debug sometimes..
+# Helps to debug sometimes..
 def print_path(path):
     for i in range(len(path)-1):
         print(f"[{path[i].state.get_state_str()}]", end=", ")
@@ -65,14 +63,12 @@ def print_path(path):
 
 
 def search(start_state, heuristic):
-
     open_set = create_open_set()
     closed_set = create_closed_set()
     start_node = search_node(start_state, 0, heuristic(start_state))
     add_to_open(start_node, open_set)
 
     while open_not_empty(open_set):
-
         current = get_best(open_set)
 
         if grid_robot_state.is_goal_state(current.state):

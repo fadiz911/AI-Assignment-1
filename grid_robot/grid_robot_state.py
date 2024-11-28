@@ -35,14 +35,13 @@ class grid_robot_state:
         x, y = self.robot_location
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-        # Keep track of original map value
         original_value = self.get_location_value(self.robot_location)
 
         # Raise Stairs by Robot
         if self.carried_stairs == 0 and original_value > 0:
             stairs_at_location = original_value
-            new_map = self.map  # Create a copy for the new state
-            new_map[x][y] = 0  # Remove stairs from current location
+            new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
+            new_map[x][y] = 0  # Remove stairs from the current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
@@ -54,8 +53,8 @@ class grid_robot_state:
 
         # Place Stairs by Robot
         elif self.carried_stairs > 0 and original_value == 0:
-            new_map = self.map  # Create a copy for the new state
-            new_map[x][y] = self.carried_stairs  # Place stairs at current location
+            new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
+            new_map[x][y] = self.carried_stairs  # Place stairs at the current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
@@ -69,7 +68,7 @@ class grid_robot_state:
         elif self.carried_stairs > 0 and original_value > 0:
             combined_height = self.carried_stairs + original_value
             if combined_height <= self.get_lamp_height():
-                new_map = self.map
+                new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
                 new_map[x][y] = 0  # Remove stairs from the map
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,
@@ -80,10 +79,11 @@ class grid_robot_state:
                 )
                 neighbors.append((new_state, 1))  # Cost is 1 for connecting stairs
 
-        # Only update affected parts of the map instead of deep copying
+        # Move Robot
         for dx, dy in directions:
             new_x, new_y = x + dx, y + dy
             if 0 <= new_x < len(self.map) and 0 <= new_y < len(self.map[0]) and self.map[new_x][new_y] != -1:
+                move_cost = 1 + self.carried_stairs
                 new_state = grid_robot_state(
                     robot_location=(new_x, new_y),
                     map=self.map,  # Reuse original map
@@ -91,7 +91,7 @@ class grid_robot_state:
                     lamp_location=self.lamp_location,
                     carried_stairs=self.carried_stairs
                 )
-                neighbors.append((new_state, 1 + self.carried_stairs))
+                neighbors.append((new_state, move_cost))
         return neighbors
 
     def get_carried_stairs(self):
