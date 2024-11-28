@@ -13,36 +13,42 @@ def base_heuristic(_grid_robot_state):
 def advanced_heuristic(_grid_robot_state):
     robot_location = _grid_robot_state.get_robot_location()
     lamp_location = _grid_robot_state.get_lamp_location()
-    lamp_height = _grid_robot_state.get_lamp_height()
+    lamp_height = _grid_robot_state.get_location_value(lamp_location)
+
     carried_stairs = _grid_robot_state.get_carried_stairs()
 
-    # Remaining height needed at the lamp
-    remaining_height = max(0, lamp_height - carried_stairs)
+    # List of all available stairs (location and height)
+    stairs_locations = [
+        (x, y, _grid_robot_state.get_location_value((x, y)))
+        for x in range(len(_grid_robot_state.map))
+        for y in range(len(_grid_robot_state.map[0]))
+        if _grid_robot_state.get_location_value((x, y)) > 0
+    ]
 
-    # Distance from robot to lamp (Manhattan distance)
+    # Distance to lamp (Manhattan distance)
     distance_to_lamp = abs(robot_location[0] - lamp_location[0]) + abs(robot_location[1] - lamp_location[1])
 
-    # If no remaining height is needed, the heuristic is just the distance to the lamp
-    if remaining_height == 0:
-        return distance_to_lamp
+    # Remaining height required at the lamp
+    remaining_stairs_height = max(0, lamp_height - carried_stairs)
 
-    # Minimal cost to gather enough stairs
-    stairs_cost = float('inf')
-    for (x, y), height in _grid_robot_state.map.items():
-        # Skip locations without stairs
-        if height <= 0:
-            continue
+    # Calculate cost to gather sufficient stairs
+    stairs_costs = []
+    for stair in stairs_locations:
+        distance_to_stair = abs(robot_location[0] - stair[0]) + abs(robot_location[1] - stair[1])
+        stairs_costs.append((distance_to_stair + 1, stair[2]))  # +1 for the pickup cost
 
-        # Distance to the stair location
-        distance_to_stair = abs(robot_location[0] - x) + abs(robot_location[1] - y)
+    stairs_costs.sort(key=lambda x: x[0])  # Sort by distance
 
-        # Cost to gather stairs from this location and move to the lamp
-        gather_cost = distance_to_stair + 1  # +1 for pickup cost
-        stairs_cost = min(stairs_cost, gather_cost)
+    gathering_cost = 0
+    for cost, height in stairs_costs:
+        if remaining_stairs_height <= 0:
+            break
+        remaining_stairs_height -= height
+        gathering_cost += cost
 
-    # If no stairs are available, return an overestimated value (not admissible)
-    if stairs_cost == float('inf'):
-        return distance_to_lamp + remaining_height
+    # Add penalty for carrying stairs while moving to the lamp
+    carrying_penalty = carried_stairs * distance_to_lamp
 
-    # Heuristic is the cost to gather stairs + distance to the lamp
-    return stairs_cost + distance_to_lamp
+    # Total heuristic cost
+    total_cost = gathering_cost + carrying_penalty
+    return total_cost
