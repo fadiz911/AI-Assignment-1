@@ -91,4 +91,3 @@ def search(start_state, heuristic):
                 add_to_open(curr_neighbor, open_set)
 
     return None
-
