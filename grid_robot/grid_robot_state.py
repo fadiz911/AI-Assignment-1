@@ -16,12 +16,8 @@ class grid_robot_state:
             else:  # map is a 2D list
                 self.height = len(map)
                 self.width = len(map[0])
-                self.map = {
-                    (r, c): map[r][c]
-                    for r in range(self.height)
-                    for c in range(self.width)
-                    if map[r][c] != 0
-                }
+                self.map = {(r, c): map[r][c] for r, row in enumerate(map) for c, val in enumerate(row) if val}
+
     @staticmethod
     def is_goal_state(_grid_robot_state):
         robot_location = _grid_robot_state.robot_location
@@ -52,28 +48,28 @@ class grid_robot_state:
         if self.carried_stairs == 0 and self.get_location_value(self.robot_location) > 0:
             location = self.robot_location
             stairs_at_location = self.get_location_value(location)
-            new_map = copy.copy(self.map)
-            new_map.pop(location) # Remove stairs from current location
+            new_map = self.map.copy()
+            new_map.pop(location)  # Remove stairs from current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
                 lamp_height=self.lamp_height,
                 lamp_location=self.lamp_location,
-                carried_stairs=stairs_at_location
+                carried_stairs=stairs_at_location,
             )
             neighbors.append((new_state, 1))
 
         # Place Stairs by Robot
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) == 0:
-            new_map = copy.copy(self.map)
             loc = (x, y)
+            new_map = self.map.copy()
             new_map[loc] = self.carried_stairs  # Place stairs at current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
                 lamp_height=self.lamp_height,
                 lamp_location=self.lamp_location,
-                carried_stairs=0
+                carried_stairs=0,
             )
             neighbors.append((new_state, 1))
 
@@ -81,14 +77,14 @@ class grid_robot_state:
         if self.carried_stairs > 0 and self.get_location_value(self.robot_location) > 0:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
             if combined_height <= self.get_lamp_height():
-                new_map = copy.copy(self.map)
-                new_map.pop((x,y))  # Remove stairs from the map
+                new_map = self.map.copy()
+                new_map.pop((x, y))  # Remove stairs from the map
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,
                     map=new_map,
                     lamp_height=self.lamp_height,
                     lamp_location=self.lamp_location,
-                    carried_stairs=combined_height
+                    carried_stairs=combined_height,
                 )
                 neighbors.append((new_state, 1))  # Cost is 1 for connecting stairs
 
@@ -100,10 +96,10 @@ class grid_robot_state:
                     cost = 1 + self.carried_stairs  # Additional cost if carrying stairs
                     new_state = grid_robot_state(
                         robot_location=(new_x, new_y),
-                        map=copy.copy(self.map),
+                        map=self.map,
                         lamp_height=self.lamp_height,
                         lamp_location=self.lamp_location,
-                        carried_stairs=self.carried_stairs
+                        carried_stairs=self.carried_stairs,
                     )
                     neighbors.append((new_state, cost))
 
