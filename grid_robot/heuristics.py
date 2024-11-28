@@ -15,6 +15,7 @@ def advanced_heuristic(_grid_robot_state):
     A heuristic combining the Manhattan distance to the lamp and the effort
     to gather sufficient stairs to match the lamp height.
     """
+
     robot_location = _grid_robot_state.get_robot_location()
     lamp_location = _grid_robot_state.get_lamp_location()
     lamp_height = _grid_robot_state.get_lamp_height()
@@ -61,7 +62,7 @@ def advanced_heuristic(_grid_robot_state):
         gathering_cost += cost
 
     # Remaining penalty for not having enough stairs after visiting all possible sources
-    remaining_penalty = max(0, lamp_height - total_gathered_height)
+    remaining_penalty = lamp_height - total_gathered_height
 
     # Heuristic: gathering cost + distance to lamp + remaining penalty
     return gathering_cost + distance_to_lamp + remaining_penalty

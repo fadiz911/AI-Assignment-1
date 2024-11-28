@@ -23,11 +23,9 @@ class grid_robot_state:
         robot_location = _grid_robot_state.robot_location
         lamp_location = _grid_robot_state.lamp_location
 
-        # Check if robot is at the lamp location
         if robot_location != lamp_location:
             return False
 
-        # Check if the height at the lamp location matches the lamp height
         return _grid_robot_state.get_location_value(lamp_location) == _grid_robot_state.get_lamp_height()
 
     def get_state_tuple(self):
