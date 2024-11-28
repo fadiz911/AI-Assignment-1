@@ -36,6 +36,7 @@ def add_to_open(vn, open_set):
     # Push the new node onto the heap
     heapq.heappush(open_set, vn)
 
+
 def add_to_closed(vn, closed_set):
     # Include robot location, stairs carried, and lamp location value
     closed_set.add((

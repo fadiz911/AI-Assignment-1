@@ -40,7 +40,7 @@ class grid_robot_state:
         # Raise Stairs by Robot
         if self.carried_stairs == 0 and original_value > 0:
             stairs_at_location = original_value
-            new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
+            new_map = [row[:] for row in self.map]
             new_map[x][y] = 0  # Remove stairs from the current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
@@ -53,7 +53,7 @@ class grid_robot_state:
 
         # Place Stairs by Robot
         elif self.carried_stairs > 0 and original_value == 0:
-            new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
+            new_map = [row[:] for row in self.map]
             new_map[x][y] = self.carried_stairs  # Place stairs at the current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
@@ -68,7 +68,7 @@ class grid_robot_state:
         elif self.carried_stairs > 0 and original_value > 0:
             combined_height = self.carried_stairs + original_value
             if combined_height <= self.get_lamp_height():
-                new_map = copy.deepcopy(self.map)  # Create a deep copy of the map
+                new_map = [row[:] for row in self.map]
                 new_map[x][y] = 0  # Remove stairs from the map
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,

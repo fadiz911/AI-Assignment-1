@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # Start tracing memory
     tracemalloc.start()
     start_time = time.time()
-    search_result = search(start_state, advanced_heuristic)
+    search_result = search(start_state, base_heuristic)
     end_time = time.time() - start_time
 
     # Stop tracing memory and take a snapshot
