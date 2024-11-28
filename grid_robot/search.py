@@ -2,7 +2,6 @@ import heapq
 from search_node import search_node
 
 
-
 def create_open_set():
     return []  # Min-heap for the open set
 
