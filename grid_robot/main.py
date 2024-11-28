@@ -17,9 +17,8 @@ if __name__ == '__main__':
         [-1, 0, 0, -1, 0, 2, 0, 3, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0],
     ]
-
     robot_start_location = (11, 0)
-    lamp_h = 6
+    lamp_h = 40
     lamp_location = (0, 11)
 
     # Proceed with the search
