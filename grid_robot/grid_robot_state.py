@@ -1,5 +1,6 @@
 import copy
 
+
 class grid_robot_state:
     def __init__(self, robot_location, map=None, lamp_height=-1, lamp_location=(-1, -1), carried_stairs=0):
         self.robot_location = robot_location
@@ -12,16 +13,15 @@ class grid_robot_state:
                 self.map = map
                 self.height = max(k[0] for k in map.keys()) + 1 if map else 0
                 self.width = max(k[1] for k in map.keys()) + 1 if map else 0
-            else:  # Assume map is a 2D list
+            else:  # map is a 2D list
                 self.height = len(map)
                 self.width = len(map[0])
                 self.map = {
                     (r, c): map[r][c]
                     for r in range(self.height)
                     for c in range(self.width)
-                    if map[r][c] > 0
+                    if map[r][c] != 0
                 }
-
     @staticmethod
     def is_goal_state(_grid_robot_state):
         robot_location = _grid_robot_state.robot_location
@@ -53,7 +53,7 @@ class grid_robot_state:
             location = self.robot_location
             stairs_at_location = self.get_location_value(location)
             new_map = copy.deepcopy(self.map)  # Use deepcopy instead of copy.copy()
-            new_map[location] = 0  # Remove stairs from current location
+            new_map.pop(location) # Remove stairs from current location
             new_state = grid_robot_state(
                 robot_location=self.robot_location,
                 map=new_map,
@@ -82,7 +82,7 @@ class grid_robot_state:
             combined_height = self.carried_stairs + self.get_location_value(self.robot_location)
             if combined_height <= self.get_lamp_height():
                 new_map = copy.deepcopy(self.map)  # Use deepcopy instead of copy.copy()
-                new_map[(x, y)] = 0  # Remove stairs from the map
+                new_map.pop((x,y))  # Remove stairs from the map
                 new_state = grid_robot_state(
                     robot_location=self.robot_location,
                     map=new_map,
