@@ -3,58 +3,45 @@ from grid_robot_state import grid_robot_state
 from search_node import search_node
 
 def create_open_set():
-    return []  # Min-heap for the open set
+    open =[]
+    hash_open = {}
+    return (open,hash_open)  # Min-heap for the open set
 
 def create_closed_set():
-    return set()
+    hash_closed = {}
+    return hash_closed
 
 def open_not_empty(open_set):
-    return bool(open_set)
+    return len(open_set[0])>0
 
 def get_best(open_set):
-    return heapq.heappop(open_set)
+    vn = heapq.heappop(open_set[0])
+    while len(open_set[0])>0 and(hash(vn.state)) not in open_set[1] or vn != open_set[1][hash(vn.state)]:
+        vn = heapq.heappop(open_set[0])
+    del open_set[1][hash(vn.state)]
+    return vn
 
 
 def add_to_open(vn, open_set):
-    """
-    Adds a search node to the open set, ensuring no duplicate states with worse or equal `g` values.
-    """
-    state_tuple = vn.state.get_state_tuple()
-
-    # Iterate through open_set to find duplicates
-    for index, node in enumerate(open_set):
-        if node.state.get_state_tuple() == state_tuple:
-            if node.g <= vn.g:
-                return  # If a better or equal `g` value exists, skip adding
-            else:
-                # Remove the worse node and push the new one
-                open_set[index] = open_set[-1]  # Replace with the last element
-                open_set.pop()  # Remove the duplicate
-                heapq.heappush(open_set, vn)  # Push the new node and restore heap properties
-                return
-
-    # Push the new node onto the heap
-    heapq.heappush(open_set, vn)
+    heapq.heappush(open_set[0], vn)
+    open_set[1][hash(vn.state)]= vn
 
 
 def add_to_closed(vn, closed_set):
-    # Include robot location, stairs carried, and lamp location value
-    closed_set.add((
-        vn.state.get_state_str(),
-        vn.state.get_carried_stairs(),
-        vn.state.get_location_value(vn.state.get_robot_location())
-    ))
+    closed_set[hash(vn.state)] = vn
 
 def duplicate_in_open(vn, open_set):
-    state_tuple = vn.state.get_state_tuple()
-    # Check for duplicate in open_set using the state_tuple
-    return any(node.state.get_state_tuple() == state_tuple and node.g <= vn.g for node in open_set)
+    if hash(vn.state) not in open_set[1]:
+        return False
+    if open_set[1][hash(vn.state)].g <=vn.g: return True
+    del open_set[1][hash(vn.state)]
+    return False
 
 def duplicate_in_closed(vn, closed_set):
-    return (vn.state.get_state_str(),
-            vn.state.get_carried_stairs(),
-            vn.state.get_location_value(vn.state.get_robot_location())
-            ) in closed_set
+   if hash(vn.state) not in closed_set:return False
+   if closed_set[1][hash(vn.state)].g <= vn.g:return True
+   del closed_set[1][hash(vn.state)]
+   return False
 
 # Helps to debug sometimes..
 def print_path(path):
