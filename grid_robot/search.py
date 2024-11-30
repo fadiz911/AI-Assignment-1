@@ -32,14 +32,6 @@ def get_best(open_set):
     Ensures the node exists in the dictionary before returning it.
     """
     return heapq.heappop(open_set[0])
-    # min_heap, node_dict = open_set
-    # while min_heap:
-    #     best_node = heapq.heappop(min_heap)
-    #     state_hash = hash(best_node.state)
-    #     if state_hash in node_dict and node_dict[state_hash] == best_node:
-    #         del node_dict[state_hash]
-    #         return best_node
-    # return None  # No valid nodes remaining
 
 
 def add_to_open(vn, open_set):
