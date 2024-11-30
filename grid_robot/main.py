@@ -16,10 +16,9 @@ if __name__ == '__main__':
     robot_start_location = (7, 0)
     lamp_h = 4
     lamp_location = (0, 4)
-
     start_state = grid_robot_state(map=map, robot_location=robot_start_location, lamp_height=lamp_h,
                                    lamp_location=lamp_location)
-
+    print(1==1.0)
     # Start tracing memory
     tracemalloc.start()
     start_time = time.time()

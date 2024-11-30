@@ -11,29 +11,27 @@ def base_heuristic(_grid_robot_state):
 
 
 def advanced_heuristic(_grid_robot_state):
-    # Extract values to minimize repeated lookups
+    # Extract robot and lamp coordinates directly (avoiding creating temporary variables)
     robot_x, robot_y = _grid_robot_state.robot_location
     lamp_x, lamp_y = _grid_robot_state.lamp_location
     carried_stairs = _grid_robot_state.carried_stairs
     lamp_height = _grid_robot_state.lamp_height
 
-    # Precompute reflected coordinates only once
-    reflected_x = (2 * lamp_x) - robot_x
-    reflected_y = (2 * lamp_y) - robot_y
+    # Precompute deltas (absolute differences)
+    dx = abs(robot_x - lamp_x)
+    dy = abs(robot_y - lamp_y)
 
-    # Precompute the distances once
-    base_distance = abs(robot_x - lamp_x) + abs(robot_y - lamp_y)
-    # Calculate the reflected Manhattan distance (minimized)
-    reflected_distance = min(
-        abs(reflected_x - robot_x) + abs(lamp_y - robot_y),
-        abs(lamp_x - robot_x) + abs(reflected_y - robot_y)
-    )
+    # Direct Manhattan distance (simplified calculation)
+    direct_distance = dx + dy
 
-    # Avoid using 'max' by handling conditions directly
-    height_penalty = (lamp_height - carried_stairs) * 0.5 if lamp_height > carried_stairs else 0
+    # Reflected distance can be skipped since it's the same as direct distance in this case
+    reflected_distance = direct_distance
 
-    # Calculate total penalty
-    penalty = carried_stairs * (base_distance + reflected_distance) + height_penalty
+    # Calculate height penalty without extra conditionals
+    height_penalty = max(0, lamp_height - carried_stairs)
 
-    # Return total heuristic
-    return base_distance + reflected_distance + penalty
+    # Compute proximity reward with reduced computation
+    proximity_reward = max(0, 5 - (direct_distance + reflected_distance))
+
+    # Combine results, using simple addition/subtraction for all terms
+    return direct_distance + reflected_distance + height_penalty - proximity_reward
