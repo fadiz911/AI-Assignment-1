@@ -3,13 +3,16 @@ import tracemalloc
 from heuristics import *
 from search import *
 
+
 def get_memory_usage():
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics('lineno')
     return top_stats[0].size  # Get the largest memory allocation
 
+
 if __name__ == '__main__':
-    map = [[0, 0, 0, 0, 0, 0, 0, 0], [2, 0, -1, 0, 0, 1, 0, 0], [0, -1, 1, 0, 2, 0, -1, 0], [0, 0, 2, 0, -1, 1, 0, 0], [0, 0, 2, 1, 0, 3, 0, 0], [-1, 1, 0, -1, 0, -1, 0, 0], [-1, 0, -1, 0, 0, 1, 0, -1], [0, 0, 0, 0, 0, 0, 0, 0]]
+    map = [[0, 0, 0, 0, 0, 0, 0, 0], [2, 0, -1, 0, 0, 1, 0, 0], [0, -1, 1, 0, 2, 0, -1, 0], [0, 0, 2, 0, -1, 1, 0, 0],
+           [0, 0, 2, 1, 0, 3, 0, 0], [-1, 1, 0, -1, 0, -1, 0, 0], [-1, 0, -1, 0, 0, 1, 0, -1], [0, 0, 0, 0, 0, 0, 0, 0]]
     robot_start_location = (7, 0)
     lamp_h = 4
     lamp_location = (0, 4)
@@ -20,7 +23,7 @@ if __name__ == '__main__':
     # Start tracing memory
     tracemalloc.start()
     start_time = time.time()
-    search_result = search(start_state, base_heuristic)
+    search_result = search(start_state, advanced_heuristic)
     end_time = time.time() - start_time
 
     # Stop tracing memory and take a snapshot
