@@ -13,6 +13,7 @@ class grid_robot_state:
                 self.height = len(map)
                 self.width = len(map[0])
                 self.map = {(r, c): map[r][c] for r, row in enumerate(map) for c, val in enumerate(row) if val}
+        self.obstacles = [key for key in self.map.keys() if self.map[key] == -1]
         self.lamp_height = lamp_height
         self.lamp_location = lamp_location
         self.carried_stairs = carried_stairs
